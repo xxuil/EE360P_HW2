@@ -2,9 +2,21 @@
 
 
 public class PriorityQueue {
+	private final int size;
+
+	private class pNode{
+	    private int p;
+	    private String name;
+
+	    private pNode(int priority, String name){
+            this.p = priority;
+            this.name = name;
+        }
+    }
 
 	public PriorityQueue(int maxSize) {
         // Creates a Priority queue with maximum allowed size as capacity
+        this.size = maxSize;
 	}
 
 	public int add(String name, int priority) {
