@@ -6,13 +6,13 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class PriorityQueue {
+    private final static boolean DEBUG = true;
 	private final int capacity;
 	private pNode head;
 	private pNode tail;
 	private AtomicInteger size;
 
 	private Lock addLock;
-	private Lock searchLock;
 	private Lock getLock;
 	private Condition addCon;
 	private Condition getCon;
@@ -24,7 +24,6 @@ public class PriorityQueue {
         this.tail = head;
         this.size = new AtomicInteger(0);
         this.addLock = new ReentrantLock();
-        this.searchLock = new ReentrantLock();
         this.getLock = new ReentrantLock();
         this.addCon = addLock.newCondition();
         this.getCon = getLock.newCondition();
@@ -37,7 +36,10 @@ public class PriorityQueue {
         // otherwise, returns -1 if the name is already present in the list.
         // This method blocks when the list is full.
         int index = 0;
+        if(DEBUG) {System.out.println(Thread.currentThread().getName() + " is locking addlock");}
         addLock.lock();
+        if(DEBUG) {System.out.println(Thread.currentThread().getName() + " locks addlock");}
+
         try{
             pNode newN = new pNode(priority, name);
             newN.lock();
@@ -64,12 +66,13 @@ public class PriorityQueue {
                     temp.unlock();
                     newN.unlock();
                 } else {
+                    boolean flag = false;
                     while(!temp.getNext().equals(temp)){
                         if(temp.equals(newN)){
                             temp.unlock();
                             newN.unlock();
                             addLock.unlock();
-                            index = -1;
+                            flag = true;
                             break;
                         }
 
@@ -89,7 +92,7 @@ public class PriorityQueue {
                             temp = temp.getNext();
                         }
                     }
-                    if(index != -1){
+                    if(flag){
                         temp.setNext(newN);
                         temp.unlock();
                         newN.unlock();
@@ -100,6 +103,7 @@ public class PriorityQueue {
             }
         } finally {
             addLock.unlock();
+            if(DEBUG) {System.out.println(Thread.currentThread().getName() + " releases addlock");}
         }
         getLock.lock();
         try{
@@ -144,16 +148,19 @@ public class PriorityQueue {
             }
 
             head.lock();
+            pNode delete = head;
             try{
                 first = head.getName();
+                head = head.getNext();
             } finally {
-                head.unlock();
+                delete.unlock();
             }
 
         }
         finally{
             getLock.unlock();
         }
+
         addLock.lock();
         try{
             addCon.signalAll();
@@ -163,6 +170,19 @@ public class PriorityQueue {
         }
         return first;
 	}
+
+	public void printQueue(){
+        System.out.println();
+        System.out.println("Printing Queue: ");
+	    pNode temp = head;
+	    int i = 0;
+	    while(!temp.getNext().equals(temp)){
+            System.out.println("[" + i + "] name: " + temp.getName() + " p: " + temp.getPriority());
+            i++;
+            temp = temp.getNext();
+        }
+	    System.out.println();
+    }
 
     private class pNode{
         private int p;
