@@ -6,7 +6,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class PriorityQueue {
-    private final static boolean ADEBUG = true;
+    private final static boolean ADEBUG = false;
     private final static boolean GDEBUG = false;
 	private final int capacity;
 	private pNode head;
@@ -64,14 +64,27 @@ public class PriorityQueue {
                 pNode temp = this.head;
                 temp.lock();
 
-                if(newN.getPriority() > temp.getPriority()){
-                    newN.setNext(temp);
-                    head = newN;
-                    size.incrementAndGet();
-                    temp.unlock();
+                if(temp.equals(newN)){
                     if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
-
+                    temp.unlock();
                     newN.unlock();
+                    index = -1;
+                }
+
+                else if(newN.getPriority() > temp.getPriority()){
+                    if(temp.equals(newN)){
+                        if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
+                        temp.unlock();
+                        newN.unlock();
+                        index = -1;
+                    } else {
+                        newN.setNext(temp);
+                        head = newN;
+                        size.incrementAndGet();
+                        temp.unlock();
+                        if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
+                        newN.unlock();
+                    }
                 } else {
                     boolean flag = true;
                     while(!temp.getNext().equals(temp)){
@@ -102,14 +115,21 @@ public class PriorityQueue {
                         }
                     }
                     if(flag){
-                        temp.setNext(newN);
-
-                        if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
-
-                        temp.unlock();
-                        newN.unlock();
-                        size.incrementAndGet();
-                        index++;
+                        if(temp.equals(newN)){
+                            if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
+                            temp.unlock();
+                            newN.unlock();
+                            index = -1;
+                        }else {
+                            temp.setNext(newN);
+                            if (ADEBUG) {
+                                System.out.println(Thread.currentThread().getName() + " unlocks new node");
+                            }
+                            temp.unlock();
+                            newN.unlock();
+                            size.incrementAndGet();
+                            index++;
+                        }
                     }
                 }
             }
@@ -150,23 +170,28 @@ public class PriorityQueue {
 	public String getFirst() {
         // Retrieves and removes the name with the highest priority in the list,
         // or blocks the thread if the list is empty.
-
         getLock.lock();
         String first = null;
         try{
             while(size.intValue() == 0){
+                if(GDEBUG) {System.out.println(Thread.currentThread().getName() + "  waiting");}
                 try {getCon.await();}
                 catch (InterruptedException ee){}
             }
-
-            head.lock();
             pNode delete = head;
+            head.lock();
             try{
                 first = head.getName();
-                head = head.getNext();
+                if(head.getNext().equals(head))
+                    head = null;
+                else {
+                    head = head.getNext();
+                }
             } finally {
                 delete.unlock();
             }
+
+            size.decrementAndGet();
 
         }
         finally{
