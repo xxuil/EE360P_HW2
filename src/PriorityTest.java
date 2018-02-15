@@ -1,14 +1,16 @@
+import java.util.Random;
+
 public class PriorityTest implements Runnable{
     final PriorityQueue gate;
-    final static int SIZE = 2;
+    final static int SIZE = 2000;
     PriorityTest(PriorityQueue gate){
         this.gate = gate;
     }
     public void run(){
-        for (int i = 0; i < 10; i++) {
-            System.out.println(Thread.currentThread().getName() + " Adding, Priority is " + i);
-            int j = gate.add(Thread.currentThread().getName(), i);
-            //int j = gate.search(Thread.currentThread().getName());
+        for (int i = 0; i < 1; i++) {
+            int p = (int)(Math.random() * 9 + 1);
+            System.out.println(Thread.currentThread().getName() + " Adding, Priority is " + p);
+            int j = gate.add(Thread.currentThread().getName(), p);
             System.out.println(Thread.currentThread().getName() + " Index is " + j);
             String name = gate.getFirst();
             System.out.println(Thread.currentThread().getName() + " first one is " + name);
@@ -23,5 +25,6 @@ public class PriorityTest implements Runnable{
         for(int i = 0; i < SIZE; i++){
             t[i].start();
         }
+        //que.printQueue();
     }
 }
