@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
@@ -16,30 +16,8 @@ public class PriorityQueue {
 	private Lock getLock;
 	private Condition addCon;
 	private Condition getCon;
-=======
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
-
-public class PriorityQueue {
-	private ReentrantLock foradd, forget;
-	private Condition isFull, isEmpty;
-	private int size;
-	private pNode head = null;
-	private pNode tail = null;
-
-	private class pNode{
-
-	    private int priority;
-	    private String name;
-	    private pNode next;
->>>>>>> 24c134626d1794a4a94289e6c6d61004fcec0720
-
 
 	public PriorityQueue(int maxSize) {
-		foradd = new ReentrantLock();
-		forget = new ReentrantLock();
-		isFull = foradd.newCondition();
-		isEmpty = forget.newCondition();
         // Creates a Priority queue with maximum allowed size as capacity
         this.capacity = maxSize;
         this.head = null;
@@ -54,37 +32,6 @@ public class PriorityQueue {
 	}
 
 	public int add(String name, int priority) {
-		while(size == 0){} //wait();
-		int index = 0;
-		pNode new_node = new pNode();
-		pNode prev = null;
-		new_node.name = name;
-		new_node.priority = priority;
-		pNode head_temp = head;
-		if(head_temp == null){
-			head = new_node;
-			size--;
-			return 0;
-		}else{
-			while(head_temp != null){
-				if(head_temp.name.equals(new_node.name)){
-					return -1;
-				}
-				if(head_temp.priority > new_node.priority){
-					head_temp = head_temp.next;
-				}else{
-					if(prev != null) {
-						prev.next = new_node;
-					}
-					new_node.next = head_temp;
-					size--;
-					return index;
-				}
-				prev = head_temp;
-				head_temp = head_temp.next;
-				index++;
-			}
-		}
         // Adds the name with its priority to this queue.
         // Returns the current position in the list where the name was inserted;
         // otherwise, returns -1 if the name is already present in the list.
