@@ -1,8 +1,5 @@
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.ArrayList;
+
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FairReadWriteLock {
