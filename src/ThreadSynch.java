@@ -1,35 +1,51 @@
-/*
- * EID's of group members
- * 
- */
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class ThreadSynch {
-    private AtomicInteger count;
-	private Semaphore example;
-	private final int parties;
+    private int count;
+    private Semaphore example;
+    private Semaphore mutex;
+    private Semaphore reset;
+    private final int parties;
 
-	public ThreadSynch(int parties) {
-		example = new Semaphore(0);
-		this.parties = parties;
-		count = new AtomicInteger(0);
-	}
+    public ThreadSynch(int parties) {
+        example = new Semaphore(1);
+        this.parties = parties;
+        this.mutex = new Semaphore(1);
+        this.reset = new Semaphore(1);
+        count = 0;
+    }
 
-	public int await() throws InterruptedException {
-        count.incrementAndGet();
-		int index = parties - count.intValue();
+    public int await() throws InterruptedException {
+        mutex.acquire();
+        reset.acquire();
+        reset.release();
 
-		if(index == 0){
-		    count.set(0);
-			example.release(parties);
-			example = new Semaphore(0);
-		} else {
-			example.acquire();
-		}
+        count++;
+        int index = parties - count;
 
-		// you need to write this code
-		return index;
-	}
+        if(index == parties - 1){
+            example.acquire();
+        }
+
+        if(index == 0){
+            reset.acquire();
+            count--;
+            example.release();
+            mutex.release();
+            return index;
+        }
+
+        mutex.release();
+        example.acquire();
+
+        count--;
+
+        if(count == 0){
+            reset.release();
+        }
+        example.release();
+        // you need to write this code
+        return index;
+    }
 }
