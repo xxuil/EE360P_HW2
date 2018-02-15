@@ -8,10 +8,11 @@ public class PriorityTest implements Runnable{
     }
     public void run(){
         for (int i = 0; i < 1; i++) {
-            int p = (int)(Math.random() * 9 + 1);
+            Random ran = new Random();
+            int p = ran.nextInt(9 + 1);
             System.out.println(Thread.currentThread().getName() + " Adding, Priority is " + p);
             int j = gate.add(Thread.currentThread().getName(), p);
-            System.out.println(Thread.currentThread().getName() + " Index is " + j);
+            //System.out.println(Thread.currentThread().getName() + " Index is " + j);
             String name = gate.getFirst();
             System.out.println(Thread.currentThread().getName() + " first one is " + name);
         }
