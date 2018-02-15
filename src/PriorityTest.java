@@ -17,6 +17,13 @@ public class PriorityTest {
                 System.out.println(Thread.currentThread().getName() + " Adding Priority is " + number);
                 lock.add(Thread.currentThread().getName(), number);
                 try {
+                    TimeUnit.MILLISECONDS.sleep(100);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                System.out.println(Thread.currentThread().getName() + " is at index " + lock.search(Thread.currentThread().getName()));
+                try {
                     TimeUnit.MILLISECONDS.sleep(5);
                 } catch (InterruptedException e) {
                     // TODO Auto-generated catch block
@@ -93,6 +100,6 @@ public class PriorityTest {
         pool2.shutdown();
     }
     public static void main(String args[]){
-        test(99, 1000, 1);
+        test(10, 0, 1);
     }
 }
