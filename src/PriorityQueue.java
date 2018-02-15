@@ -1,4 +1,11 @@
-
+/*
+ * EE 360P HW 2
+ * Name 1: Xiangxing Liu
+ * EID 1: xl5587
+ * Name 2: Kravis Cho
+ * EID 2: kyc375
+ * 02/14/2018
+ */
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
@@ -7,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class PriorityQueue {
     private final static boolean ADEBUG = false;
-    private final static boolean GDEBUG = false;
+    private final static boolean GDEBUG = true;
 	private final int capacity;
 	private pNode head;
 	private pNode tail;
@@ -36,15 +43,14 @@ public class PriorityQueue {
         // Returns the current position in the list where the name was inserted;
         // otherwise, returns -1 if the name is already present in the list.
         // This method blocks when the list is full.
-        int index = 0;
         if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " is locking addlock");}
         addLock.lock();
+        int index = 0;
         if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " locks addlock");}
 
         try{
             pNode newN = new pNode(priority, name);
             if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " locks new node");}
-            //if(ADEBUG) printQueue();
             newN.lock();
 
             //2. Check if queue is full or not
@@ -60,7 +66,9 @@ public class PriorityQueue {
                 size.incrementAndGet();
                 if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
                 newN.unlock();
-            } else {
+            }
+
+            else {
                 pNode temp = this.head;
                 temp.lock();
 
@@ -72,20 +80,15 @@ public class PriorityQueue {
                 }
 
                 else if(newN.getPriority() > temp.getPriority()){
-                    if(temp.equals(newN)){
-                        if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
-                        temp.unlock();
-                        newN.unlock();
-                        index = -1;
-                    } else {
-                        newN.setNext(temp);
-                        head = newN;
-                        size.incrementAndGet();
-                        temp.unlock();
-                        if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
-                        newN.unlock();
-                    }
-                } else {
+                    newN.setNext(temp);
+                    head = newN;
+                    size.incrementAndGet();
+                    temp.unlock();
+                    if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
+                    newN.unlock();
+                }
+
+                else {
                     boolean flag = true;
                     while(!temp.getNext().equals(temp)){
                         if(temp.equals(newN)){
@@ -114,6 +117,7 @@ public class PriorityQueue {
                             temp = temp.getNext();
                         }
                     }
+
                     if(flag){
                         if(temp.equals(newN)){
                             if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
@@ -179,6 +183,9 @@ public class PriorityQueue {
                 catch (InterruptedException ee){}
             }
             pNode delete = head;
+
+            //if(head == null) { throw new NullPointerException(); }
+
             head.lock();
             try{
                 first = head.getName();
@@ -246,9 +253,7 @@ public class PriorityQueue {
             return this.name;
         }
 
-        int getPriority(){
-            return this.p;
-        }
+        int getPriority(){ return this.p; }
 
         pNode getNext(){
             return this.next;
@@ -259,14 +264,7 @@ public class PriorityQueue {
         }
 
         boolean equals(pNode that){
-            if(this.name.equals(that.getName())){
-                return true;
-            }
-            return false;
-        }
-
-        Condition getCondition(){
-            return this.lock.newCondition();
+            return this.name.equals(that.getName());
         }
 
         void lock(){

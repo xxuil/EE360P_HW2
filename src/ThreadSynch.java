@@ -1,51 +1,77 @@
+/*
+ * EE 360P HW 2
+ * Name 1: Xiangxing Liu
+ * EID 1: xl5587
+ * Name 2: Kravis Cho
+ * EID 2: kyc375
+ * 02/14/2018
+ */
+
 import java.util.concurrent.Semaphore;
 
 
 public class ThreadSynch {
     private int count;
-    private Semaphore example;
-    private Semaphore mutex;
-    private Semaphore reset;
+    private Semaphore waitLock;
+    private Semaphore mutexLock;
+    private Semaphore resetLock;
     private final int parties;
 
     public ThreadSynch(int parties) {
-        example = new Semaphore(1);
+        waitLock = new Semaphore(1);
         this.parties = parties;
-        this.mutex = new Semaphore(1);
-        this.reset = new Semaphore(1);
+        this.mutexLock = new Semaphore(1);
+        this.resetLock = new Semaphore(1);
         count = 0;
     }
 
     public int await() throws InterruptedException {
-        mutex.acquire();
-        reset.acquire();
-        reset.release();
+        /* Mutex ensures that only one thread will enter */
+        mutexLock.acquire();
 
+        /* Critical Section for mutexLock */
+        resetLock.acquire();
+        resetLock.release();
+
+        /*
+         * Count keeps track of the amount of threads for this round
+         * Index is the index value ready to return
+         */
         count++;
         int index = parties - count;
 
+        /* If this is the first of this round, acquire twice */
         if(index == parties - 1){
-            example.acquire();
+            waitLock.acquire();
         }
 
+        /*
+         * If this is the last of this round, release
+         * Release ensures that no other threads will enter next
+         * round's release section before the current round get finished
+         */
         if(index == 0){
-            reset.acquire();
+            resetLock.acquire();
             count--;
-            example.release();
-            mutex.release();
+            waitLock.release();
+            mutexLock.release();
             return index;
         }
 
-        mutex.release();
-        example.acquire();
+        /* Release mutex and let the thread wait for the last one */
+        mutexLock.release();
+        waitLock.acquire();
 
+        /* Decrement count means that this thread is exiting this round */
         count--;
 
+        /* If this is the last that gets released, release resetLock */
         if(count == 0){
-            reset.release();
+            resetLock.release();
         }
-        example.release();
-        // you need to write this code
+
+        /* Release from waiting */
+        waitLock.release();
         return index;
     }
 }
