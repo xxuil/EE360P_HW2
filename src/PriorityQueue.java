@@ -6,7 +6,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class PriorityQueue {
-    private final static boolean ADEBUG = false;
+    private final static boolean ADEBUG = true;
     private final static boolean GDEBUG = false;
 	private final int capacity;
 	private pNode head;
@@ -44,7 +44,7 @@ public class PriorityQueue {
         try{
             pNode newN = new pNode(priority, name);
             if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " locks new node");}
-            if(ADEBUG) printQueue();
+            //if(ADEBUG) printQueue();
             newN.lock();
 
             //2. Check if queue is full or not
@@ -196,9 +196,9 @@ public class PriorityQueue {
         System.out.println("[" + i + "] name: " + temp.getName() + " p: " + temp.getPriority());
 
 	    while(!temp.getNext().equals(temp)){
-            System.out.println("[" + i + "] name: " + temp.getName() + " p: " + temp.getPriority());
             i++;
             temp = temp.getNext();
+            System.out.println("[" + i + "] name: " + temp.getName() + " p: " + temp.getPriority());
         }
 	    System.out.println();
     }
