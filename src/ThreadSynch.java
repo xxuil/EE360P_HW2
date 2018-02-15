@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ThreadSynch {
     private AtomicInteger count;
 	private Semaphore example;
-	private int parties;
+	private final int parties;
 
 	public ThreadSynch(int parties) {
 		example = new Semaphore(0);
