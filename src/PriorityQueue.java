@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class PriorityQueue {
     private final static boolean ADEBUG = false;
-    private final static boolean GDEBUG = true;
+    private final static boolean GDEBUG = false;
 	private final int capacity;
 	private pNode head;
 	private pNode tail;
@@ -70,6 +70,7 @@ public class PriorityQueue {
 
             else {
                 pNode temp = this.head;
+                if(head == null) { throw new NullPointerException(); }
                 temp.lock();
 
                 if(temp.equals(newN)){
@@ -184,7 +185,7 @@ public class PriorityQueue {
             }
             pNode delete = head;
 
-            //if(head == null) { throw new NullPointerException(); }
+            if(head == null) { throw new NullPointerException(); }
 
             head.lock();
             try{

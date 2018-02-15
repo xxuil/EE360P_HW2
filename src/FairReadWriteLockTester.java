@@ -11,6 +11,12 @@ public class FairReadWriteLockTester {
         public void run() {
             for(int i = 0; i < attempts; i++){
                 lock.beginRead();
+                try {
+                    TimeUnit.MILLISECONDS.sleep(5);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 lock.endRead();
                 try {
                     TimeUnit.MILLISECONDS.sleep(5);
@@ -25,8 +31,14 @@ public class FairReadWriteLockTester {
     private static class WriteThread extends Thread {
         public void run() {
             for(int i = 0; i < attempts; i++){
-                    lock.beginWrite();
-                    lock.endWrite();
+                lock.beginWrite();
+                try {
+                    TimeUnit.MILLISECONDS.sleep(5);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                lock.endWrite();
                 try {
                     TimeUnit.MILLISECONDS.sleep(50);
                 } catch (InterruptedException e) {

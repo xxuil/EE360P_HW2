@@ -14,15 +14,16 @@ public class PriorityTest {
             Random rand = new Random();
             int number = rand.nextInt(10);
             for(int i = 0; i < attempts; i++){
-                System.out.println(Thread.currentThread().getName() + " Adding Priority is " + number);
-                lock.add(Thread.currentThread().getName(), number);
+                System.out.println(Thread.currentThread().getName() + " Adding Priority is " + number +
+                " at index " + lock.add(Thread.currentThread().getName(), number));
+                //lock.add(Thread.currentThread().getName(), number);
                 try {
                     TimeUnit.MILLISECONDS.sleep(100);
                 } catch (InterruptedException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                System.out.println(Thread.currentThread().getName() + " is at index " + lock.search(Thread.currentThread().getName()));
+                //System.out.println(Thread.currentThread().getName() + " is at index " + lock.search(Thread.currentThread().getName()));
                 try {
                     TimeUnit.MILLISECONDS.sleep(5);
                 } catch (InterruptedException e) {
@@ -53,7 +54,7 @@ public class PriorityTest {
         readers = new GetThread[numReaders];
         attempts = numAttempts;
 
-        ExecutorService pool1 = Executors.newFixedThreadPool(100);
+        ExecutorService pool1 = Executors.newFixedThreadPool(1000);
         ExecutorService pool2 = Executors.newFixedThreadPool(1000);
 
         for(int i = 0; i < writers.length; i++) {
@@ -100,6 +101,6 @@ public class PriorityTest {
         pool2.shutdown();
     }
     public static void main(String args[]){
-        test(10, 0, 1);
+        test(2, 3, 200);
     }
 }
