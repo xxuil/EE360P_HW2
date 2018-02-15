@@ -6,7 +6,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class PriorityQueue {
-    private final static boolean DEBUG = true;
+    private final static boolean ADEBUG = false;
+    private final static boolean GDEBUG = false;
 	private final int capacity;
 	private pNode head;
 	private pNode tail;
@@ -36,16 +37,19 @@ public class PriorityQueue {
         // otherwise, returns -1 if the name is already present in the list.
         // This method blocks when the list is full.
         int index = 0;
-        if(DEBUG) {System.out.println(Thread.currentThread().getName() + " is locking addlock");}
+        if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " is locking addlock");}
         addLock.lock();
-        if(DEBUG) {System.out.println(Thread.currentThread().getName() + " locks addlock");}
+        if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " locks addlock");}
 
         try{
             pNode newN = new pNode(priority, name);
+            if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " locks new node");}
+            if(ADEBUG) printQueue();
             newN.lock();
 
             //2. Check if queue is full or not
             while(size.intValue() == capacity){
+                if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " cap full, waiting");}
                 try{ addCon.await();}
                 catch (InterruptedException ee){}
             }
@@ -54,6 +58,7 @@ public class PriorityQueue {
                 this.head = newN;
                 this.tail = newN;
                 size.incrementAndGet();
+                if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
                 newN.unlock();
             } else {
                 pNode temp = this.head;
@@ -64,15 +69,18 @@ public class PriorityQueue {
                     head = newN;
                     size.incrementAndGet();
                     temp.unlock();
+                    if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
+
                     newN.unlock();
                 } else {
-                    boolean flag = false;
+                    boolean flag = true;
                     while(!temp.getNext().equals(temp)){
                         if(temp.equals(newN)){
+                            if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
                             temp.unlock();
                             newN.unlock();
-                            addLock.unlock();
-                            flag = true;
+                            index = -1;
+                            flag = false;
                             break;
                         }
 
@@ -83,6 +91,7 @@ public class PriorityQueue {
                             index ++;
                             temp.unlock();
                             newN.unlock();
+                            flag = false;
                             break;
                         }
                         else{
@@ -94,6 +103,9 @@ public class PriorityQueue {
                     }
                     if(flag){
                         temp.setNext(newN);
+
+                        if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " unlocks new node");}
+
                         temp.unlock();
                         newN.unlock();
                         size.incrementAndGet();
@@ -102,8 +114,8 @@ public class PriorityQueue {
                 }
             }
         } finally {
+            if(ADEBUG) {System.out.println(Thread.currentThread().getName() + " releases addlock");}
             addLock.unlock();
-            if(DEBUG) {System.out.println(Thread.currentThread().getName() + " releases addlock");}
         }
         getLock.lock();
         try{
@@ -176,6 +188,13 @@ public class PriorityQueue {
         System.out.println("Printing Queue: ");
 	    pNode temp = head;
 	    int i = 0;
+	    if(temp == null) {
+	        System.out.println("Empty");
+	        return;
+	    }
+
+        System.out.println("[" + i + "] name: " + temp.getName() + " p: " + temp.getPriority());
+
 	    while(!temp.getNext().equals(temp)){
             System.out.println("[" + i + "] name: " + temp.getName() + " p: " + temp.getPriority());
             i++;
